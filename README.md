@@ -223,10 +223,11 @@ Body: lot_number, captcha_output, pass_token, gen_time, captcha_id, sign_token
 
 <div align="center">
 
-| 微信 | 支付宝 |
-|:---:|:---:|
-| 请作者喝杯咖啡 | 请作者喝杯咖啡 |
-| *(扫码赞助)* | *(扫码赞助)* |
+| 微信 |
+|:---:|
+| 请作者喝杯咖啡 |
+| <img width="1037" height="1037" alt="mm_reward_qrcode_1780886891243" src="https://github.com/user-attachments/assets/32d9d9b5-d9bf-4196-82e6-46a7eab8d815" />
+ |
 
 </div>
 
