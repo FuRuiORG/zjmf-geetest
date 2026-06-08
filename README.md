@@ -198,6 +198,23 @@ Body: lot_number, captcha_output, pass_token, gen_time, captcha_id, sign_token
 
 ---
 
+## 支持作者 / Buy Me a Coffee ☕
+
+如果这个插件帮到了你，欢迎请作者喝杯咖啡，每一份支持都是我持续维护和更新的动力～
+
+<div align="center">
+
+| 微信 |
+|:---:|
+| 请作者喝杯咖啡 |
+| <img width="1037" height="1037" alt="mm_reward_qrcode_1780886891243" src="https://github.com/user-attachments/assets/fea0bcb1-9a73-4a53-bfc5-e877292e740f" />
+
+</div>
+
+> 💡 赞助完全自愿，无论是否赞助都不影响插件的正常使用。你的认可就是最好的支持！
+
+---
+
 ## 开源协议
 
 MIT License
