@@ -75,6 +75,17 @@
 
               <li class="row my-3">
                 <span class="col-md-8 col-xs-12">
+                  <span class="biaoti">25YTheme 兼容</span>
+                  <select class="form-control" style="display:inline-block;width:60%;" name="enable_25y_theme">
+                    <option value="0" {if $config.enable_25y_theme eq '0' || !$config.enable_25y_theme}selected{/if}>关闭 - 使用插件前端接管验证码</option>
+                    <option value="1" {if $config.enable_25y_theme eq '1'}selected{/if}>开启 - 兼容模板自带极验字段</option>
+                  </select>
+                  <br><small class="text-black-50" style="margin-left:138px;">开启后请先在系统设置中关闭图形验证码，插件不接管模板前端，仅在后端识别 geetest_* 字段并二次校验；极验配置需在模板独立后台中设置，并确保插件后台的 captcha_id 和 captcha_key 与模板一致</small>
+                </span>
+              </li>
+
+              <li class="row my-3">
+                <span class="col-md-8 col-xs-12">
                   <span class="biaoti">captcha_id</span>
                   <input class="form-control" style="display:inline-block;width:60%;"
                          type="text" name="captcha_id"

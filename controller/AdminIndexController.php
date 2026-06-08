@@ -20,6 +20,7 @@ class AdminIndexController extends \app\admin\controller\PluginAdminBaseControll
                 'riskType'    => $param['riskType'] ?? 'slide',
                 'replace_native_captcha' => $param['replace_native_captcha'] ?? '1',
                 'disable_native_captcha' => $param['disable_native_captcha'] ?? '0',
+                'enable_25y_theme' => $param['enable_25y_theme'] ?? '0',
             ];
             // captcha_key 为空时保留旧值，避免空值覆盖
             if (empty($data['captcha_key'])) {

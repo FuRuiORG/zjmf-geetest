@@ -9,7 +9,7 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         'description' => '极验 v4 人机验证码，通过 custom_captcha_check hook 拦截系统验证码校验',
         'status'      => 1,
         'author'      => 'RuiNexus',
-        'version'     => '1.2.1',
+        'version'     => '1.3.1',
     ];
 
     public function install()
@@ -43,6 +43,7 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         if ($this->isAdminPath()) return '';
         if (!configuration('is_captcha')) return '';
         $config = $this->getConfig();
+        if (!empty($config['enable_25y_theme'])) return '';
         if (empty($config['captcha_id'])) return '';
         if (empty($config['replace_native_captcha'])) return '';
 
@@ -59,6 +60,7 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         if ($this->isAdminPath()) return '';
         if (!configuration('is_captcha')) return '';
         $config = $this->getConfig();
+        if (!empty($config['enable_25y_theme'])) return '';
         if (empty($config['captcha_id'])) return '';
         if (empty($config['replace_native_captcha'])) return '';
 
@@ -528,11 +530,42 @@ JS;
         $request = request()->param();
         $config = $this->getConfig();
 
+        if (!empty($config['enable_25y_theme'])) {
+            $request['lot_number'] = $request['lot_number'] ?? ($request['geetest_lot_number'] ?? null);
+            $request['captcha_output'] = $request['captcha_output'] ?? ($request['geetest_captcha_output'] ?? null);
+            $request['pass_token'] = $request['pass_token'] ?? ($request['geetest_pass_token'] ?? null);
+            $request['gen_time'] = $request['gen_time'] ?? ($request['geetest_gen_time'] ?? null);
+        }
+
+        $hasGeetestParams = !empty($request['lot_number']) && !empty($request['captcha_output']) &&
+            !empty($request['pass_token']) && !empty($request['gen_time']);
+
+        if (!empty($config['enable_25y_theme']) && $hasGeetestParams) {
+            if (empty($config['captcha_id']) || empty($config['captcha_key'])) {
+                return null;
+            }
+            $result = $this->geetestValidate(
+                $config['captcha_id'],
+                $config['captcha_key'],
+                $request['lot_number'],
+                $request['captcha_output'],
+                $request['pass_token'],
+                $request['gen_time']
+            );
+            return $result['status'] === 'success' ? true : false;
+        }
+
+        if (!empty($config['enable_25y_theme']) && !$hasGeetestParams) {
+            throw new \think\exception\HttpResponseException(\think\Response::create([
+                'status' => 400,
+                'msg'    => '请完成人机验证',
+            ], 'json'));
+        }
+
         // 禁用原生验证码：无论是否替换前端，后端都拒绝原生验证码通过
         if (!empty($config['disable_native_captcha'])) {
             // 有极验参数 → 走极验校验
-            if (!empty($request['lot_number']) && !empty($request['captcha_output']) &&
-                !empty($request['pass_token']) && !empty($request['gen_time'])) {
+            if ($hasGeetestParams) {
                 if (empty($config['captcha_id']) || empty($config['captcha_key'])) {
                     throw new \think\exception\HttpResponseException(\think\Response::create([
                         'status' => 400,

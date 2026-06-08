@@ -36,4 +36,10 @@ return [
         'value' => '0',
         'tip'   => '开启后，即使用户未完成极验也无法通过原生图形验证码校验，防止绕过极验',
     ],
+    'enable_25y_theme' => [
+        'title' => '25YTheme 兼容模式',
+        'type'  => 'select',
+        'value' => '0',
+        'tip'   => '开启后不接管模板前端，仅兼容 25YTheme 自带极验提交的 geetest_* 字段',
+    ],
 ];
