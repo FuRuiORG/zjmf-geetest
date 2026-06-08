@@ -1,10 +1,6 @@
 # 极验验证码插件 (Geetest v4)
 
-> 作者：RuiNexus | 版本：1.1.2 | 适用系统：智简魔方财务系统
-
-> **致觉得不够好的朋友**  
-> 这个插件是作者认真设计和测试的产物，文档也力求清楚。如果你认为某部分实现不佳或说明不清，欢迎提出具体的 Issue 或 Pull Request，我会非常感谢并认真改进。如果暂时不符合你的预期，也完全可以自由选择不用——它一直会是开源且免费的。
-
+> 作者：RuiNexus | 版本：1.2.0 | 适用系统：智简魔方财务系统
 
 ---
 
@@ -112,6 +108,7 @@ public/plugins/addons/geetest/
 当前已在以下模板上测试通过：
 
 - `default` — 系统默认模板
+- `user` — 用户中心模板
 
 如果您使用的模板出现以下情况，请在 GitHub Issues 反馈：
 
@@ -174,6 +171,14 @@ Body: lot_number, captcha_output, pass_token, gen_time, captcha_id, sign_token
 
 ## 更新日志
 
+### v1.2.1 (2026-06-08)
+
+- 修复后台地址下登录请求被插件验证码逻辑拦截的问题
+
+### v1.2.0 (2026-06-08)
+
+- 新增适配 `user` 用户中心模板（自动识别 `#jiyan-*` 占位 div）
+
 ### v1.1.2 (2026-06-08)
 
 - 修复 popup 模式下极验触发按钮不可见的问题
@@ -208,10 +213,10 @@ Body: lot_number, captcha_output, pass_token, gen_time, captcha_id, sign_token
 
 <div align="center">
 
-| 微信 |
-|:---:|
-| 请作者喝杯咖啡 |
-| <img width="1037" height="1037" alt="mm_reward_qrcode_1780886891243" src="https://github.com/user-attachments/assets/fea0bcb1-9a73-4a53-bfc5-e877292e740f" />
+| 微信 | 支付宝 |
+|:---:|:---:|
+| 请作者喝杯咖啡 | 请作者喝杯咖啡 |
+| *(扫码赞助)* | *(扫码赞助)* |
 
 </div>
 

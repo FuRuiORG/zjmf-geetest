@@ -9,7 +9,7 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         'description' => '极验 v4 人机验证码，通过 custom_captcha_check hook 拦截系统验证码校验',
         'status'      => 1,
         'author'      => 'RuiNexus',
-        'version'     => '1.1.2',
+        'version'     => '1.2.1',
     ];
 
     public function install()
@@ -22,12 +22,25 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         return true;
     }
 
+    private function isAdminPath()
+    {
+        $adminApplication = trim(config('database.admin_application') ?: 'admin', '/');
+        if ($adminApplication === '') return false;
+
+        $path = parse_url(request()->url(), PHP_URL_PATH);
+        $path = '/' . ltrim($path ?: '', '/');
+        $adminPrefix = '/' . $adminApplication;
+
+        return strcasecmp($path, $adminPrefix) === 0 || stripos($path, $adminPrefix . '/') === 0;
+    }
+
     /**
      * client_area_head_output hook
      * 自动在前台页面 <head> 中注入极验 v4 SDK
      */
     public function clientAreaHeadOutput()
     {
+        if ($this->isAdminPath()) return '';
         if (!configuration('is_captcha')) return '';
         $config = $this->getConfig();
         if (empty($config['captcha_id'])) return '';
@@ -43,6 +56,7 @@ class GeetestPlugin extends \app\admin\lib\Plugin
      */
     public function clientAreaFooterOutput()
     {
+        if ($this->isAdminPath()) return '';
         if (!configuration('is_captcha')) return '';
         $config = $this->getConfig();
         if (empty($config['captcha_id'])) return '';
@@ -185,6 +199,16 @@ class GeetestPlugin extends \app\admin\lib\Plugin
     }
 
     /* 以下 float / popup 模式需要在页面显示容器 */
+
+    /* 用户中心模板：优先复用 #jiyan-* 占位 div */
+    var jiyanDiv = form.querySelector('[id^="jiyan-"]');
+    if (jiyanDiv) {
+      if (box.parentNode !== jiyanDiv) {
+        jiyanDiv.innerHTML = '';
+        jiyanDiv.appendChild(box);
+      }
+      return;
+    }
 
     /* 判断表单是否使用 Bootstrap 网格布局（模态框中的表单） */
     var isGridForm = !!form.querySelector('.form-group.row .col-sm-3');
@@ -499,6 +523,8 @@ JS;
      */
     public function customCaptchaCheck($param)
     {
+        if ($this->isAdminPath()) return null;
+
         $request = request()->param();
         $config = $this->getConfig();
 
