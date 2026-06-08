@@ -1,6 +1,6 @@
 # 极验验证码插件 (Geetest v4)
 
-> 作者：RuiNexus | 版本：1.1.1 | 适用系统：智简魔方财务系统
+> 作者：RuiNexus | 版本：1.1.2 | 适用系统：智简魔方财务系统
 
 ---
 
@@ -172,7 +172,8 @@ Body: lot_number, captcha_output, pass_token, gen_time, captcha_id, sign_token
 
 ### v1.1.2 (2026-06-08)
 
-- 修复 popup 模式下极验触发按钮不可见的问题（positionBox 误将 popup 当 bind 处理）
+- 修复 popup 模式下极验触发按钮不可见的问题
+- 精简 clientarea 控制器，移除冗余 DB 查询
 
 ### v1.1.1 (2026-06-08)
 
