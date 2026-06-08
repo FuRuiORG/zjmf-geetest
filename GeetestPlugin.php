@@ -9,16 +9,57 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         'description' => '极验 v4 人机验证码，通过 custom_captcha_check hook 拦截系统验证码校验',
         'status'      => 1,
         'author'      => 'RuiNexus',
-        'version'     => '1.3.1',
+        'version'     => '1.4.0',
     ];
 
     public function install()
     {
+        // 注册 app_begin hook 到数据库
+        $exists = \think\Db::name('hook_plugin')
+            ->where('hook', 'app_begin')
+            ->where('plugin', 'Geetest')
+            ->find();
+        if (!$exists) {
+            \think\Db::name('hook_plugin')->insert([
+                'hook'   => 'app_begin',
+                'plugin' => 'Geetest',
+                'status' => 1,
+            ]);
+        }
+
+        // 自动在 index.php 插入 guard include（已存在则跳过）
+        $indexFile = CMF_ROOT . 'public/index.php';
+        if (is_file($indexFile) && is_writable($indexFile)) {
+            $content = file_get_contents($indexFile);
+            $guardMarker = "// 极验插件 25YTheme API 守卫";
+            if (strpos($content, $guardMarker) === false) {
+                $guardCode = "// 极验插件 25YTheme API 守卫（拦截无验证码的登录/注册 API POST）\n"
+                    . '$guardFile = CMF_ROOT . \'public/plugins/addons/geetest/guard.php\';' . "\n"
+                    . 'if (is_file($guardFile)) include_once $guardFile;';
+                $anchor = 'require CMF_ROOT . \'vendor/thinkphp/base.php\';';
+                $replace = $anchor . "\n" . $guardCode;
+                $content = str_replace($anchor, $replace, $content);
+                file_put_contents($indexFile, $content);
+            }
+        }
+
         return true;
     }
 
     public function uninstall()
     {
+        // 自动从 index.php 删除 guard include
+        $indexFile = CMF_ROOT . 'public/index.php';
+        if (is_file($indexFile) && is_writable($indexFile)) {
+            $content = file_get_contents($indexFile);
+            $guardMarker = "// 极验插件 25YTheme API 守卫";
+            if (strpos($content, $guardMarker) !== false) {
+                $pattern = '/\s*\/\/\s*极验插件[^\n]*\n\$guardFile[^\n]*\nif\s*\(\s*\s*is_file\s*\(\s*\$guardFile\s*\)\s*\)\s*include_once\s*\$guardFile\s*;\s*/';
+                $content = preg_replace($pattern, '', $content);
+                file_put_contents($indexFile, $content);
+            }
+        }
+
         return true;
     }
 
@@ -32,6 +73,42 @@ class GeetestPlugin extends \app\admin\lib\Plugin
         $adminPrefix = '/' . $adminApplication;
 
         return strcasecmp($path, $adminPrefix) === 0 || stripos($path, $adminPrefix . '/') === 0;
+    }
+
+    /**
+     * app_begin hook
+     * 25YTheme 模式：请求分发前拦截登录/注册 API 的 geetest_* 参数
+     * 防止直接 POST 绕过模板极验
+     */
+    public function appBegin()
+    {
+        if (!request()->isPost()) return;
+
+        $config = $this->getConfig();
+
+        // 非 25YTheme 模式：由插件前端接管，不在此拦截
+        if (empty($config['enable_25y_theme'])) return;
+
+        // 插件极验未完整启用
+        if (empty($config['captcha_id']) || empty($config['captcha_key'])) return;
+
+        // 需要极验保护的下游登录/注册 API 端点（正则，忽略多余斜杠）
+        $path = request()->pathinfo();
+        if (!preg_match('#/{1,}(v1/(login|register|pwreset|login_api)|login_pass|mobile_login|login_send|register_(phone|email)|reset_(phone|email)|phone_pass_login|email_login)(\b|$)#', '/' . ltrim($path, '/'))) return;
+
+        $params = request()->param();
+        // 25YTheme 模板提交 geetest_* 前缀字段
+        $lotNumber = $params['lot_number'] ?? $params['geetest_lot_number'] ?? null;
+        $captchaOutput = $params['captcha_output'] ?? $params['geetest_captcha_output'] ?? null;
+        $passToken = $params['pass_token'] ?? $params['geetest_pass_token'] ?? null;
+        $genTime = $params['gen_time'] ?? $params['geetest_gen_time'] ?? null;
+
+        if (!$lotNumber || !$captchaOutput || !$passToken || !$genTime) {
+            throw new \think\exception\HttpResponseException(\think\Response::create([
+                'status' => 400,
+                'msg'    => '请完成人机验证',
+            ], 'json', 400));
+        }
     }
 
     /**
@@ -432,8 +509,16 @@ class GeetestPlugin extends \app\admin\lib\Plugin
     /* 极验已通过，放行点击，$.ajaxPrefilter 会自动附加极验参数 */
   }, true);
 
-  /* 验证码发送相关的 AJAX URL 列表 */
-  var captchaAjaxUrls = ['_send', 'bind_phone', 'bind_email', 'change_email', 'remind_send', 'bind_phone_code', 'second_verify_send'];
+  /* 需要附加极验参数的 AJAX URL（验证码发送 + 登录/注册 API） */
+  var captchaAjaxUrls = [
+    '/v1/login', '/v1/register', '/v1/pwreset', '/v1/login_api',
+    '_send', 'bind_phone', 'bind_email', 'change_email', 'remind_send',
+    'bind_phone_code', 'second_verify_send',
+    'login_pass_phone', 'login_pass_email', 'login_send', 'mobile_login',
+    'phone_pass_login', 'email_login',
+    'register_phone_send', 'register_email_send', 'register_phone', 'register_email',
+    'reset_phone_send', 'reset_email_send', 'reset_phone', 'reset_email'
+  ];
 
   function isCaptchaAjaxUrl(url) {
     if (!url) return false;

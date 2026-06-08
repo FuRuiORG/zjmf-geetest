@@ -1,6 +1,6 @@
 # 极验验证码插件 (Geetest v4)
 
-> 作者：RuiNexus | 版本：1.2.0 | 适用系统：智简魔方财务系统
+> 作者：RuiNexus | 版本：1.4.0 | 适用系统：智简魔方财务系统
 
 ---
 
@@ -170,6 +170,16 @@ Body: lot_number, captcha_output, pass_token, gen_time, captcha_id, sign_token
 ---
 
 ## 更新日志
+
+### v1.4.0 (2026-06-08)
+
+- 新增 `app_begin` 钩子中间件，在请求分发前拦截登录/注册 API 直接 POST
+- 无有效极验参数时直接拒绝，防止绕过前端直接调用 API 接口
+
+### v1.3.2 (2026-06-08)
+
+- 修复 AJAX 直接 POST 登录/注册接口时极验参数未附加的问题
+- 扩展 AJAX prefilter 白名单覆盖所有登录、注册、重置密码相关 API 端点
 
 ### v1.3.1 (2026-06-08)
 
