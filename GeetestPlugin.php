@@ -27,39 +27,11 @@ class GeetestPlugin extends \app\admin\lib\Plugin
             ]);
         }
 
-        // 自动在 index.php 插入 guard include（已存在则跳过）
-        $indexFile = CMF_ROOT . 'public/index.php';
-        if (is_file($indexFile) && is_writable($indexFile)) {
-            $content = file_get_contents($indexFile);
-            $guardMarker = "// 极验插件 25YTheme API 守卫";
-            if (strpos($content, $guardMarker) === false) {
-                $guardCode = "// 极验插件 25YTheme API 守卫（拦截无验证码的登录/注册 API POST）\n"
-                    . '$guardFile = CMF_ROOT . \'public/plugins/addons/geetest/guard.php\';' . "\n"
-                    . 'if (is_file($guardFile)) include_once $guardFile;';
-                $anchor = 'require CMF_ROOT . \'vendor/thinkphp/base.php\';';
-                $replace = $anchor . "\n" . $guardCode;
-                $content = str_replace($anchor, $replace, $content);
-                file_put_contents($indexFile, $content);
-            }
-        }
-
         return true;
     }
 
     public function uninstall()
     {
-        // 自动从 index.php 删除 guard include
-        $indexFile = CMF_ROOT . 'public/index.php';
-        if (is_file($indexFile) && is_writable($indexFile)) {
-            $content = file_get_contents($indexFile);
-            $guardMarker = "// 极验插件 25YTheme API 守卫";
-            if (strpos($content, $guardMarker) !== false) {
-                $pattern = '/\s*\/\/\s*极验插件[^\n]*\n\$guardFile[^\n]*\nif\s*\(\s*\s*is_file\s*\(\s*\$guardFile\s*\)\s*\)\s*include_once\s*\$guardFile\s*;\s*/';
-                $content = preg_replace($pattern, '', $content);
-                file_put_contents($indexFile, $content);
-            }
-        }
-
         return true;
     }
 
